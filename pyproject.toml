@@ -19,7 +19,9 @@ dependencies = [
     "python-jose[cryptography]",
     "passlib[bcrypt]",
     "pydantic",
-    "bcrypt<4.0.0" 
+    "bcrypt<4.0.0",
+    "azure-identity",
+    "azure-keyvault-secrets", 
 ]
 
 [project.optional-dependencies]
