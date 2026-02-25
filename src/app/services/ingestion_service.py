@@ -4,9 +4,12 @@ import os
 from app.core.logging import get_logger 
 from app.services.azure.azure_blob_service import AzureBlobService
 from app.services.db.document_service import DocumentService
+from app.services.kyb_pipeline.document_classification_pipeline import DocumentClassificationPipeline
 from app.utils.file import detect_file_type
 from app.core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.utils.misc import str_to_date
 
 
 
@@ -21,6 +24,7 @@ class BaseProcessor(ABC):
         self.temp_folder = settings.temp_file_path
         self.db_path = os.path.join(self.temp_folder, f"{session_id}.db")
         self.document_service = DocumentService()
+        self.document_classification_pipeline=DocumentClassificationPipeline()
 
         self.logger = logger
     
@@ -65,6 +69,7 @@ class PDFProcessor(BaseProcessor):
         self.logger.info("Processing PDF file: %s | company_id=%s", filename, company_id)
 
         blob_service = AzureBlobService()
+        
         upload_result = blob_service.upload_file(
             file_path=file_path,
             filename=filename,
@@ -73,8 +78,16 @@ class PDFProcessor(BaseProcessor):
 
         blob_path = upload_result["blob_name"]
 
+        #Documetn classification and metadata exraction
+        result = self.document_processor.process_document(file_path) 
+        classType=result["classType"]
+        issueDate=result["issueDate"]
+        expiryDate=result["expiryDate"]
+        confidence=result["confidence"]
+        language=result["language"]
+        
+        
         # Save metadata in DB
-         
         document_list = await self.document_service.upload_documents(
             db,
             [
@@ -84,7 +97,14 @@ class PDFProcessor(BaseProcessor):
                     "uploader": uploader,
                     "blob_path": blob_path,
                     "status": "uploaded",
-                    "company_id": company_id
+                    "company_id": company_id,
+                    "class_type":classType,
+                    "issue_date":str_to_date(issueDate),
+                    "expiry_date":str_to_date(expiryDate),
+                    "confidence":confidence,
+                    "language":language
+
+
                 }
             ]
         )
