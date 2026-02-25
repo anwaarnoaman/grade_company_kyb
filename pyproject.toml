@@ -28,7 +28,8 @@ dependencies = [
     "psycopg2-binary",
     "fpdf",
     "PyPDF2",
-    "langdetect"
+    "langdetect",
+    "python-dateutil"
 
 ]
 

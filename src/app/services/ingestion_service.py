@@ -79,7 +79,7 @@ class PDFProcessor(BaseProcessor):
         blob_path = upload_result["blob_name"]
 
         #Documetn classification and metadata exraction
-        result = self.document_processor.process_document(file_path) 
+        result = self.document_classification_pipeline.process_document(file_path) 
         classType=result["classType"]
         issueDate=result["issueDate"]
         expiryDate=result["expiryDate"]
