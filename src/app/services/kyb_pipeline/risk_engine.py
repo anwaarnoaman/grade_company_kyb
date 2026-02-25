@@ -5,7 +5,7 @@ class RiskEngine:
 
     def __init__(self):
         self.score = 0
-        self.risk_drivers = []  # ← track all risk drivers
+        self.risk_drivers = []  
         self.exceptions = []
 
     # ------------------------------
@@ -178,6 +178,6 @@ class RiskEngine:
         return {
             "financialRiskScore": self.score,
             "riskBand": band,
-            "riskDrivers": self.risk_drivers,  # ✅ fully explainable
+            "riskDrivers": self.risk_drivers,   
             "confidenceLevel": "High" if self.score < 40 else "Medium"
         }, self.exceptions
