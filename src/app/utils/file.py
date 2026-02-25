@@ -3,7 +3,7 @@ import magic
 def detect_file_type(file_path: str) -> str:
     """
     Detect common file types using python-magic
-    Returns: excel, csv, pdf, word, text, html, json, other
+    Returns: excel, csv, pdf, word, text, html, json, image, other
     """
     try:
         mime_type = magic.from_file(file_path, mime=True)
@@ -28,5 +28,7 @@ def detect_file_type(file_path: str) -> str:
         return 'html'
     elif mime_type == 'application/json':
         return 'json'
+    elif mime_type.startswith('image/'):
+        return 'image'  # Handles jpg, png, gif, bmp, webp, etc.
     else:
         return 'other'
