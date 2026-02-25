@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from app.core.logging import get_logger
 from app.core.security_utils import create_access_token
-from app.services.auth_service import authenticate_user  # import from service
+from app.services.db.auth_service import authenticate_user  # import from service
 
 logger = get_logger(__name__)
 

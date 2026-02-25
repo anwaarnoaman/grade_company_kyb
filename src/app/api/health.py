@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.core.logging import get_logger
-from app.core.dependencies import get_current_user
+from app.core.auth_dependencies import get_current_user
 
 logger = get_logger(__name__)
 
