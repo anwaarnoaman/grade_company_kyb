@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     logger.info("Starting application...")
 
     yield  # app is now running
-
+    
     # Shutdown
     logger.info("Application shutting down")
 
@@ -31,6 +31,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.health import router as health_router
 from app.api.documents import router as document_router 
 from app.api.security import router as security_router 
+from app.api.compnay_profile import router as compnay_profile_router 
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,7 +41,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 app.include_router(health_router)
+app.include_router(compnay_profile_router)
 app.include_router(document_router)
 app.include_router(security_router)
 
