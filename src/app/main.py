@@ -32,6 +32,7 @@ from app.api.health import router as health_router
 from app.api.documents import router as document_router 
 from app.api.security import router as security_router 
 from app.api.compnay_profile import router as compnay_profile_router 
+from app.api.logs import router as log_router 
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,6 +47,7 @@ app.include_router(health_router)
 app.include_router(compnay_profile_router)
 app.include_router(document_router)
 app.include_router(security_router)
+app.include_router(log_router)
 
 @app.get("/")
 def root():

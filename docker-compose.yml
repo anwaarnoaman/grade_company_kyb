@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8000"
+    environment:
+      SECRET_KEY: some_secret
+      ALGORITHM: HS256
+      DATABASE_URL: postgresql://admin:admin@192.168.2.155:5432/test
+      DATABASE_URL_ASYNC: postgresql+asyncpg://admin:admin@192.168.2.155:5432/test
+      AZURE_STORAGE_BLOB_CONNECTION_STRING: DefaultEndpointsProtocol=https;AccountName=dfm1122storage;AccountKey=Nomi;EndpointSuffix=core.windows.net
+      AZURE_STORAGE_CONTAINER: documents
+    command: >
+      sh -c "alembic -c /app/alembic.ini upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"

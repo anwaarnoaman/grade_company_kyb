@@ -22,7 +22,6 @@ RUN apt-get update && apt-get install -y \
     libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
-
 # ==============================
 # Install Python dependencies
 # ==============================
@@ -31,23 +30,26 @@ RUN pip install --upgrade pip \
     && pip install .
 
 # ==============================
-# Copy application source
+# Copy application source & migrations
 # ==============================
 COPY src/app ./app
 COPY .env .env
- 
+COPY alembic.ini .
+COPY migrations ./migrations
+
 # ==============================
 # Expose FastAPI port
 # ==============================
 EXPOSE 8000
 
 # ==============================
-# Run FastAPI
+# Run Alembic migrations + FastAPI
 # ==============================
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
- 
+CMD ["sh", "-c", "alembic -c /app/alembic.ini upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
 
 # sudo docker build -t dfm-backend-app .
 # sudo docker run -p 8082:8000 dfm-backend-app
-# sudo docker tag dfm-backend-app anwaarnoaman/dfm-backend-app:1.0.0
-# sudo docker push anwaarnoaman/dfm-backend-app:1.0.0
+# sudo docker tag dfm-backend-app anwaarnoaman/dfm-backend-app:1.0.2
+# sudo docker push anwaarnoaman/dfm-backend-app:1.0.2
+
+ 
