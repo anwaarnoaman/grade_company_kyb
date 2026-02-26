@@ -659,7 +659,6 @@ function MissingFieldsCard({ fields }: { fields: string[] }) {
     </Card>
   )
 }
-
 // --- Edit Summary Panel ---
 
 function EditSummaryPanel({ edits }: { edits: ManualEdit[] }) {
@@ -763,9 +762,7 @@ function SubmitConfirmationDialog({
     </Dialog>
   )
 }
-
 // --- Main Page ---
-
 export default function GenerateKYBPage({
   params,
 }: {

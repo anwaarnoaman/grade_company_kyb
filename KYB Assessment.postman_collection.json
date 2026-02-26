@@ -31,7 +31,7 @@
             {
               "type": "text",
               "key": "username",
-              "value": "noaman"
+              "value": "noamana"
             },
             {
               "type": "text",
@@ -278,6 +278,44 @@
             "companies",
             "6f4b5616-1935-4f0d-9522-d352cf01eb84",
             "generate-kyb"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Logs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJub2FtYW4iLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzIxMjI5NjR9.I6kvY-3b3iezEy934WXSKtChbt5r_FS4MnHHWjR3R7w"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8082/logs?file_name=kyb_audit.log&company_id=2d638064-5542-44e0-bdf5-12ce17c8d0f5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8082",
+          "path": [
+            "logs"
+          ],
+          "query": [
+            {
+              "key": "file_name",
+              "value": "kyb_audit.log"
+            },
+            {
+              "key": "company_id",
+              "value": "2d638064-5542-44e0-bdf5-12ce17c8d0f5"
+            }
           ]
         }
       },

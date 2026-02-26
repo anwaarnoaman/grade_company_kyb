@@ -35,6 +35,33 @@ class CompanyProfileRepository:
         )
         return result.scalars().first()
         
+    async def update(
+        self,
+        db: AsyncSession,
+        company_id: str,
+        kyb_data: dict
+    ) -> CompanyProfile | None:
+        """
+        Overwrite full kyb_data JSON object.
+        """
+        result = await db.execute(
+            select(CompanyProfile).where(
+                CompanyProfile.company_id == company_id
+            )
+        )
+        company = result.scalars().first()
+
+        if not company:
+            return None
+
+        # ✅ Replace entire JSON
+        company.kyb_data = kyb_data
+
+        await db.commit()
+        await db.refresh(company)
+
+        return company
+      
     async def delete(self, db: AsyncSession, company_id: str) -> bool:
         """
         Delete a company profile by its ID.

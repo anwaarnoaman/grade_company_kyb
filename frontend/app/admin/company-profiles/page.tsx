@@ -37,6 +37,7 @@ import {
   Loader2,
   AlertCircle,
   ArrowRight,
+  FileJson,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -45,9 +46,13 @@ import useSWR from "swr"
 export default function CompanyProfilesPage() {
   const { token } = useAuth()
   const router = useRouter()
+
   const [dialogOpen, setDialogOpen] = useState(false)
   const [companyName, setCompanyName] = useState("")
   const [creating, setCreating] = useState(false)
+
+  const [kybDialogOpen, setKybDialogOpen] = useState(false)
+  const [selectedKybData, setSelectedKybData] = useState<any>(null)
 
   const {
     data: companies,
@@ -85,6 +90,7 @@ export default function CompanyProfilesPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -94,6 +100,8 @@ export default function CompanyProfilesPage() {
             Manage your company profiles and KYB verification
           </p>
         </div>
+
+        {/* Create Company Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -101,6 +109,7 @@ export default function CompanyProfilesPage() {
               New Company
             </Button>
           </DialogTrigger>
+
           <DialogContent>
             <form onSubmit={handleCreateCompany}>
               <DialogHeader>
@@ -109,6 +118,7 @@ export default function CompanyProfilesPage() {
                   Enter the company name to create a new KYB profile.
                 </DialogDescription>
               </DialogHeader>
+
               <div className="flex flex-col gap-2 py-4">
                 <Label htmlFor="company-name">Company Name</Label>
                 <Input
@@ -120,6 +130,7 @@ export default function CompanyProfilesPage() {
                   autoFocus
                 />
               </div>
+
               <DialogFooter>
                 <Button
                   type="button"
@@ -128,6 +139,7 @@ export default function CompanyProfilesPage() {
                 >
                   Cancel
                 </Button>
+
                 <Button type="submit" disabled={creating || !companyName.trim()}>
                   {creating ? (
                     <>
@@ -144,6 +156,7 @@ export default function CompanyProfilesPage() {
         </Dialog>
       </div>
 
+      {/* Companies Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -154,6 +167,7 @@ export default function CompanyProfilesPage() {
             A list of all company profiles in the system
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -182,70 +196,152 @@ export default function CompanyProfilesPage() {
                   <TableHead>ID</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Company ID</TableHead>
-                  <TableHead>Status</TableHead>
+                      <TableHead>Exceptions</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
+
+ 
+
               <TableBody>
-  {companies.map((company) => (
-    <TableRow key={company.id}>
-      <TableCell className="font-mono text-xs">{company.id}</TableCell>
-      <TableCell className="font-medium">{company.name}</TableCell>
-      <TableCell className="font-mono text-xs text-muted-foreground">
-        {company.company_id}
-      </TableCell>
-      <TableCell>
-        <Badge
-          variant={company.status === "active" ? "default" : "secondary"}
-        >
-          {company.status}
-        </Badge>
-      </TableCell>
-      <TableCell className="text-right flex justify-end gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() =>
-            router.push(
-              `/admin/company-profiles/${company.company_id}/upload-documents`
-            )
-          }
-        >
-          Upload Docs
-          <ArrowRight className="size-3" />
-        </Button>
+                {companies.map((company: any) => (
+                  <TableRow key={company.id}>
+                    <TableCell className="font-mono text-xs">
+                      {company.id}
+                    </TableCell>
 
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={async () => {
-            if (!token) return
-            const confirmDelete = confirm(
-              `Are you sure you want to delete "${company.name}"?`
-            )
-            if (!confirmDelete) return
+                    <TableCell className="font-medium">
+                      {company.name}
+                    </TableCell>
 
-            try {
-              const result = await deleteCompany(token, company.company_id)
-              toast.success(result.message)
-              mutate() // refresh the company list
-            } catch (err) {
-              toast.error(
-                err instanceof Error ? err.message : "Failed to delete company"
-              )
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {company.company_id}
+                    </TableCell>
+
+             <TableCell>
+  <div className="flex flex-wrap gap-1">
+    {company.kyb_data?.complianceIndicators?.exceptions?.length > 0 ? (
+      company.kyb_data.complianceIndicators.exceptions.map(
+        (exception: any, index: number) => (
+          <Badge
+            key={index}
+            variant={
+              exception.severity === "High"
+                ? "destructive"
+                : exception.severity === "Medium"
+                ? "secondary"
+                : "outline"
             }
-          }}
-        >
-          Delete
-        </Button>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+            className="text-xs"
+          >
+            {exception.message}
+          </Badge>
+        )
+      )
+    ) : (
+      <Badge variant="outline" className="text-xs">
+        None
+      </Badge>
+    )}
+  </div>
+</TableCell>
+
+                    <TableCell className="text-right flex justify-end gap-2">
+                                            {/* Upload Docs */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          router.push(
+                            `/admin/company-profiles/${company.company_id}/upload-documents`
+                          )
+                        }
+                      >
+                        Upload Docs
+                        <ArrowRight className="size-3" />
+                      </Button>
+
+                                            {/* KYB Data */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedKybData(company.kyb_data || {})
+                          setKybDialogOpen(true)
+                        }}
+                      >
+                        <FileJson className="size-3 mr-1" />
+                        Show Profile
+                      </Button>
+
+
+
+                      {/* Delete */}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={async () => {
+                          if (!token) return
+                          const confirmDelete = confirm(
+                            `Are you sure you want to delete "${company.name}"?`
+                          )
+                          if (!confirmDelete) return
+
+                          try {
+                            const result = await deleteCompany(
+                              token,
+                              company.company_id
+                            )
+                            toast.success(result.message)
+                            mutate()
+                          } catch (err) {
+                            toast.error(
+                              err instanceof Error
+                                ? err.message
+                                : "Failed to delete company"
+                            )
+                          }
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
+
+      {/* KYB Data Dialog */}
+      <Dialog open={kybDialogOpen} onOpenChange={setKybDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>KYB Data</DialogTitle>
+            <DialogDescription>
+              Raw KYB verification data for this company.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-[500px] overflow-auto rounded-md bg-muted p-4">
+            <pre className="text-xs whitespace-pre-wrap break-words">
+              {selectedKybData && Object.keys(selectedKybData).length > 0
+                ? JSON.stringify(selectedKybData, null, 2)
+                : "No KYB data available"}
+            </pre>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setKybDialogOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
