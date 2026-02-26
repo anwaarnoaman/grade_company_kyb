@@ -56,4 +56,25 @@ async def save_multiple_files(
             if path.exists():
                 os.remove(path)
 
+    # -------------------------------
+    # AUDIT LOG: User upload summary
+    # -------------------------------
+    uploaded_files = [r for r in results if r["status"] != "failed"]
+    failed_files = [r for r in results if r["status"] == "failed"]
+
+    logger.info(
+        f"User uploaded {len(files)} file(s) | Successful: {len(uploaded_files)} | Failed: {len(failed_files)}",
+        extra={
+            "audit": True,
+            "event_type": "USER_UPLOAD_BATCH",
+            "company_id": company_id,
+            "actor": uploader,
+            "uploaded_files": [f["filename"] for f in uploaded_files],
+            "failed_files": [f["filename"] for f in failed_files],
+            "total_files": len(files),
+            "success_count": len(uploaded_files),
+            "failed_count": len(failed_files),
+        }
+    )
+
     return results

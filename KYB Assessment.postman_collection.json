@@ -1,11 +1,157 @@
 {
   "info": {
-    "_postman_id": "319d6af7-20c1-4267-ae5d-e9cd0c411a55",
+    "_postman_id": "77971e00-e598-40f2-8175-ecba7e382847",
     "name": "KYB Assessment",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "7374475"
   },
   "item": [
+    {
+      "name": "login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "type": "text",
+              "key": "grant_type",
+              "value": "password"
+            },
+            {
+              "type": "text",
+              "key": "username",
+              "value": "noaman"
+            },
+            {
+              "type": "text",
+              "key": "password",
+              "value": "noaman123"
+            },
+            {
+              "type": "text",
+              "key": "scope",
+              "value": ""
+            },
+            {
+              "type": "text",
+              "key": "client_id",
+              "value": "string"
+            },
+            {
+              "type": "text",
+              "key": "client_secret",
+              "value": "********"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8082/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8082",
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "health check",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJub2FtYW4iLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzIwODYyMTZ9.K5-XpSV6CgVAaoNLS0nDqh8dkacNEttS5-sMwze0JXU",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8082/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8082",
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "compnay create",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJub2FtYW4iLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzIwODYyMTZ9.K5-XpSV6CgVAaoNLS0nDqh8dkacNEttS5-sMwze0JXU",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"noaman llc\",\n  \"status\": \"active\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8082/companies/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8082",
+          "path": [
+            "companies",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
     {
       "name": "upload document",
       "request": {
@@ -14,7 +160,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJub2FtYW4iLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzE5MjUzODN9.HoflE_znVWNfN715qj2CWw_NqrZ9XX2KzLoiqtWtJuI",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJub2FtYW4iLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzIwOTQzMjJ9.Add8Tfo3wlCUrCxvrOVHewgzeCi5SZwriRNgR7-bhQU",
               "type": "string"
             }
           ]
@@ -31,28 +177,30 @@
           "formdata": [
             {
               "type": "text",
-              "key": "session_id",
-              "value": "123123123123123"
+              "key": "company_id",
+              "value": "6f4b5616-1935-4f0d-9522-d352cf01eb84"
             },
             {
               "type": "file",
               "key": "files",
               "src": [
-                "/home/aiuser/Downloads/UAEU Hourly sheet July 2025.pdf",
-                "/home/aiuser/Downloads/UAEU Hourly sheet May 2025.pdf",
-                "/home/aiuser/Downloads/UAEU Hourly sheet June 2025-1.pdf"
+                "/home/aiuser/Desktop/work/personal/grade_company_kyb/notebooks/synthetic_documents/balance_sheet.pdf",
+                "/home/aiuser/Desktop/work/personal/grade_company_kyb/notebooks/synthetic_documents/bank_letter.pdf",
+                "/home/aiuser/Desktop/work/personal/grade_company_kyb/notebooks/synthetic_documents/board_resolution.pdf",
+                "/home/aiuser/Desktop/work/personal/grade_company_kyb/notebooks/synthetic_documents/id_john_smith.pdf",
+                "/home/aiuser/Desktop/work/personal/grade_company_kyb/notebooks/synthetic_documents/moa_aoa.pdf",
+                "/home/aiuser/Desktop/work/personal/grade_company_kyb/notebooks/synthetic_documents/profit_loss.pdf",
+                "/home/aiuser/Desktop/work/personal/grade_company_kyb/notebooks/synthetic_documents/trade_license.pdf",
+                "/home/aiuser/Desktop/work/personal/grade_company_kyb/notebooks/synthetic_documents/vat_certificate.pdf"
               ]
             }
           ]
         },
         "url": {
-          "raw": "http://127.0.0.1:8082/documents/upload",
+          "raw": "http://localhost:8082/documents/upload",
           "protocol": "http",
           "host": [
-            "127",
-            "0",
-            "0",
-            "1"
+            "localhost"
           ],
           "port": "8082",
           "path": [
@@ -64,34 +212,74 @@
       "response": []
     },
     {
-      "name": "login",
-      "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
-    },
-    {
-      "name": "health check",
-      "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
-    },
-    {
-      "name": "compnay create",
-      "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
-    },
-    {
       "name": "get documents",
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJub2FtYW4iLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzIwODYyMTZ9.K5-XpSV6CgVAaoNLS0nDqh8dkacNEttS5-sMwze0JXU",
+              "type": "string"
+            }
+          ]
+        },
         "method": "GET",
-        "header": []
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8082/documents/by-company/f750f638-d711-4d21-8a0a-0252283db2fe",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8082",
+          "path": [
+            "documents",
+            "by-company",
+            "f750f638-d711-4d21-8a0a-0252283db2fe"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "genertae kyb",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJub2FtYW4iLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzIwOTM1OTd9.fa5hPyqmY2NYadPZjTwUhcsLlPodE0Z9Kj2M5z14Cco",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8082/companies/6f4b5616-1935-4f0d-9522-d352cf01eb84/generate-kyb",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8082",
+          "path": [
+            "companies",
+            "6f4b5616-1935-4f0d-9522-d352cf01eb84",
+            "generate-kyb"
+          ]
+        }
       },
       "response": []
     }

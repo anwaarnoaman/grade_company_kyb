@@ -106,12 +106,10 @@ class KYBExtractionPipeline:
 
     def extract_company_profile(self, text, file):
         profile = {}
+        # Only non-license company info
         patterns = {
             "legalName": r"COMPANY NAME:\s*(.+)",
-            "registrationNumber": r"LICENSE NUMBER:\s*(.+)",
-            "jurisdiction": r"JURISDICTION:\s*(.+)",
-            "legalForm": r"LEGAL FORM:\s*(.+)",
-            "licenseIssuingAuthority": r"ISSUING AUTHORITY:\s*(.+)"
+            "legalForm": r"LEGAL FORM:\s*(.+)"
         }
 
         for field, pattern in patterns.items():
@@ -119,6 +117,30 @@ class KYBExtractionPipeline:
             if match:
                 profile[field] = build_field(match.group(1).strip(), file, 0.95)
         return profile
+
+
+    def extract_license_details(self, text, file):
+        license_info = {}
+        patterns = {
+            "registrationNumber": r"LICENSE NUMBER:\s*(.+)",
+            "jurisdiction": r"JURISDICTION:\s*(.+)",
+            "licenseIssuingAuthority": r"ISSUING AUTHORITY:\s*(.+)",
+            "issueDate": r"ISSUE DATE:\s*(.+)",
+            "expiryDate": r"EXPIRY DATE:\s*(.+)"
+        }
+
+        for field, pattern in patterns.items():
+            match = re.search(pattern, text)
+            if match:
+                # For dates, parse to ISO format if possible
+                if "Date" in field:
+                    try:
+                        license_info[field] = build_field(date_parser.parse(match.group(1)).date().isoformat(), file, 0.95)
+                    except:
+                        license_info[field] = build_field(match.group(1).strip(), file, 0.8)
+                else:
+                    license_info[field] = build_field(match.group(1).strip(), file, 0.95)
+        return license_info
 
     def extract_shareholders(self, text, file):
         shareholders = []
@@ -142,25 +164,39 @@ class KYBExtractionPipeline:
             })
         return signatories
 
-    def extract_financials(self, text, file):
+    def extract_financials(self, text, file, doc_type=None):
         financials = {}
-        numeric_patterns = {
-            "revenue": r"REVENUE:\s*([\d,]+)",
-            "netProfit": r"NET PROFIT:\s*([\d,]+)",
-            "totalAssets": r"TOTAL ASSETS:\s*([\d,]+)",
-            "totalLiabilities": r"TOTAL LIABILITIES:\s*([\d,]+)"
-        }
+        
+        if doc_type == "Balance Sheet":
+            patterns = {
+                "totalAssets": r"TOTAL ASSETS:\s*(-?[\d,]+)",
+                "totalLiabilities": r"TOTAL LIABILITIES:\s*(-?[\d,]+)"
+            }
+        elif doc_type == "Profit & Loss":
+            patterns = {
+                "revenue": r"REVENUE:\s*(-?[\d,]+)",
+                "netProfit": r"NET PROFIT:\s*(-?[\d,]+)"
+            }
+        else:
+            # fallback: try all numeric patterns
+            patterns = {
+                "revenue": r"REVENUE:\s*(-?[\d,]+)",
+                "netProfit": r"NET PROFIT:\s*(-?[\d,]+)",
+                "totalAssets": r"TOTAL ASSETS:\s*(-?[\d,]+)",
+                "totalLiabilities": r"TOTAL LIABILITIES:\s*(-?[\d,]+)"
+            }
 
-        for field, pattern in numeric_patterns.items():
-            match = re.search(pattern, text)
+        for field, pattern in patterns.items():
+            match = re.search(pattern, text, flags=re.IGNORECASE)
             if match:
+                # Remove commas and convert to float
                 value = float(match.group(1).replace(",", ""))
                 financials[field] = build_field(value, file, 0.95)
-
+        
+        # Optional audit and FY period
         audit = re.search(r"AUDIT STATUS:\s*(.+)", text)
         if audit:
             financials["auditStatus"] = build_field(audit.group(1).strip(), file, 0.9)
-
         period = re.search(r"FY\s*(\d{4})", text)
         if period:
             financials["financialPeriod"] = build_field(period.group(1), file, 0.85)
@@ -172,29 +208,34 @@ class KYBExtractionPipeline:
     # -------------------------
 
     def update_unified_object(self, unified: Dict, file_path: str) -> None:
-        file_name = os.path.basename(file_path)
-        text = self.extract_text(file_path)
-        classification = self.classify_document(text)
-        dates = self.extract_issue_expiry(text)
+            file_name = os.path.basename(file_path)
+            text = self.extract_text(file_path)
+            classification = self.classify_document(text)
+            dates = self.extract_issue_expiry(text)
 
-        # Append document metadata
-        unified["documents"].append({
-            "fileName": file_name,
-            "classType": classification["classType"],
-            "confidence": classification["confidence"],
-            "issueDate": dates["issueDate"],
-            "expiryDate": dates["expiryDate"],
-            "processedAt": datetime.utcnow().isoformat()
-        })
+            # Append document metadata
+            unified["documents"].append({
+                "fileName": file_name,
+                "classType": classification["classType"],
+                "confidence": classification["confidence"],
+                "issueDate": dates["issueDate"],
+                "expiryDate": dates["expiryDate"],
+                "processedAt": datetime.utcnow().isoformat()
+            })
 
-        # Update companyProfile (merge)
-        unified["companyProfile"].update(self.extract_company_profile(text, file_name))
-        unified["shareholders"].extend(self.extract_shareholders(text, file_name))
-        unified["signatories"].extend(self.extract_signatories(text, file_name))
-        unified["financialIndicators"].update(self.extract_financials(text, file_name))
+            # Update companyProfile (non-license fields)
+            unified["companyProfile"].update(self.extract_company_profile(text, file_name))
 
-        # Detect missing fields dynamically
-        self.detect_missing_fields(unified)
+            # Update license details separately
+            unified["licenseDetails"].update(self.extract_license_details(text, file_name))
+
+            # Other extractions
+            unified["shareholders"].extend(self.extract_shareholders(text, file_name))
+            unified["signatories"].extend(self.extract_signatories(text, file_name))
+            financial_data = self.extract_financials(text, file_name, doc_type=classification["classType"])
+            unified["financialIndicators"].update(financial_data)
+            # Detect missing fields dynamically
+            self.detect_missing_fields(unified)
 
     # -------------------------
     # MISSING FIELD DETECTION
@@ -202,7 +243,7 @@ class KYBExtractionPipeline:
 
     def detect_missing_fields(self, output):
         required_profile = ["legalName", "registrationNumber", "jurisdiction"]
-        required_financials = ["totalAssets", "totalLiabilities"]
+        required_financials = ["totalAssets", "totalLiabilities","revenue","netProfit"]
 
         # Reset missing fields each time
         output["missingFields"] = []

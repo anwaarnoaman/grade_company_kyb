@@ -21,10 +21,9 @@ SUPPORTED_DOCUMENT_TYPES = {
     "UAE PASSPORT": "ID",
     "BANK": "Bank Letter",
     "VAT REGISTRATION": "VAT / TRN",
-    "BALANCE SHEET": "Financial Statement",
-    "PROFIT & LOSS": "Financial Statement",
+    "BALANCE SHEET": "Balance Sheet",        # changed
+    "PROFIT & LOSS": "Profit & Loss",        # changed
 }
-
 
 # -----------------------------
 # Utility: Safe Masking

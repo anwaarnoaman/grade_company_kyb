@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+from typing import List
+
+from fastapi import APIRouter, Body, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db_dependencies import get_db
 from app.core.auth_dependencies import get_current_user
@@ -49,6 +51,32 @@ async def create_company_profile(
         raise HTTPException(status_code=500, detail="Failed to create company profile")
     
 
+@router.get("/", response_model=List[CompanyProfileRead])
+async def get_all_companies(
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Retrieve all company profiles.
+    """
+    try:
+        logger.info(
+            "User %s (ID: %s) requested all company profiles",
+            current_user.username,
+            current_user.user_id,
+        )
+
+        companies = await service.get_all_companies(db=db)
+        return companies
+
+    except Exception:
+        logger.exception(
+            "Failed to fetch all companies for user %s (ID: %s)",
+            current_user.username,
+            current_user.user_id,
+        )
+        raise HTTPException(status_code=500, detail="Failed to fetch companies")
+
 
 @router.post("/{company_id}/generate-kyb")
 async def generate_company_kyb(
@@ -88,3 +116,80 @@ async def generate_company_kyb(
             current_user.user_id,
         )
         raise HTTPException(status_code=500, detail="Failed to generate KYB")
+    
+@router.post("/{company_id}/save_profile")
+async def save_profile( 
+    payload: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Save manual edits to KYB profile.
+    """
+    try:
+        kyb_data = payload.get("kyb_data")
+        manual_edits = payload.get("manual_edits", [])
+        company_id=kyb_data["company_id"],  
+        if not kyb_data:
+            raise HTTPException(status_code=400, detail="kyb_data missing")
+
+        updated_data = await service.save_manual_edits(
+            db=db,
+            company_id=company_id,
+            kyb_data=kyb_data["kyb_result"],
+            manual_edits=manual_edits,
+            actor=current_user.username,
+        )
+
+        return {"status": "success", "company_id": company_id, "updated_data": updated_data}
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        logger.exception(
+            "Failed to save profile for company_id=%s by user %s (ID: %s)",
+            company_id,
+            current_user.username,
+            current_user.user_id,
+        )
+        raise HTTPException(status_code=500, detail="Failed to save profile")
+
+@router.delete("/{company_id}", response_model=dict)
+async def delete_company(
+    company_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Delete a company profile by ID.
+    """
+    try:
+        # Check if company exists
+        company = await service.get_company_by_id(db=db, company_id=company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Company not found")
+
+        # Delete company
+        await service.delete_company(db=db, company_id=company_id)
+
+        logger.info(
+            "User %s (ID: %s) deleted company_id=%s",
+            current_user.username,
+            current_user.user_id,
+            company_id,
+        )
+
+        return {"status": "success", "message": f"Company {company_id} deleted"}
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        logger.exception(
+            "Failed to delete company_id=%s by user %s (ID: %s)",
+            company_id,
+            current_user.username,
+            current_user.user_id,
+        )
+        raise HTTPException(status_code=500, detail="Failed to delete company")        
