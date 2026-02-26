@@ -50,7 +50,6 @@ async def create_company_profile(
         )
         raise HTTPException(status_code=500, detail="Failed to create company profile")
     
-
 @router.get("/", response_model=List[CompanyProfileRead])
 async def get_all_companies(
     db: AsyncSession = Depends(get_db),
@@ -76,7 +75,6 @@ async def get_all_companies(
             current_user.user_id,
         )
         raise HTTPException(status_code=500, detail="Failed to fetch companies")
-
 
 @router.post("/{company_id}/generate-kyb")
 async def generate_company_kyb(
@@ -129,7 +127,10 @@ async def save_profile(
     try:
         kyb_data = payload.get("kyb_data")
         manual_edits = payload.get("manual_edits", [])
-        company_id=kyb_data["company_id"],  
+        company_id = kyb_data.get("company_id")
+
+        if isinstance(company_id, tuple):
+            company_id = company_id[0]
         if not kyb_data:
             raise HTTPException(status_code=400, detail="kyb_data missing")
 

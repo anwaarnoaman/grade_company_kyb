@@ -72,7 +72,7 @@ class CompanyProfileService:
         """
         Update company profile in DB.
         """
-        return await self.repo.update(db=db, company_id=company_id, data=updated_data)
+        return await self.repo.update(db=db, company_id=company_id, kyb_data=updated_data)
 
     async def delete_company(self, db: AsyncSession, company_id: str) -> bool:
         """
@@ -94,6 +94,6 @@ class CompanyProfileService:
         )
 
         # Save updated data to DB
-        # await self.update_company_profile(db=db, company_id=company_id, updated_data=updated_data)
+        await self.update_company_profile(db=db, company_id=company_id, updated_data=updated_data)
 
         return updated_data

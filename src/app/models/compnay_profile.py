@@ -1,6 +1,5 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 import uuid
 from app.db.base import Base
 
@@ -11,3 +10,6 @@ class CompanyProfile(Base):
     company_id = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False)
     name = Column(String, nullable=False)
     status = Column(String, default="active")
+
+ 
+    kyb_data = Column(JSONB, nullable=True)

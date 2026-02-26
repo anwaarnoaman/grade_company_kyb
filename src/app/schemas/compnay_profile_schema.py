@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Optional
 import uuid
 
 class CompanyProfileCreate(BaseModel):
@@ -10,6 +10,7 @@ class CompanyProfileCreate(BaseModel):
 class CompanyProfileRead(CompanyProfileCreate):
     id: int
     company_id: uuid.UUID
+    kyb_data: Optional[Dict[str, Any]] = None
 
     class Config:
         from_attributes = True
