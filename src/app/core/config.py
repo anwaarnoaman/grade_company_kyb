@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # Database URLs
     database_url: str = "postgresql://admin:admin@localhost:5432/dfm"
     database_url_async: str = "postgresql+asyncpg://admin:admin@localhost:5432/dfm"
+    
 
     # Pydantic config to load .env locally
     model_config = SettingsConfigDict(
