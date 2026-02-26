@@ -9,10 +9,10 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Logging
-    log_level: str = ""
-    log_to_file: bool = False
-    log_file_path: str = ""
-    temp_file_path: str = "" 
+    log_level: str = "INFO"
+    log_to_file: bool = True
+    log_file_path: str = "logs/app.log"
+    temp_file_path: str = "temp" 
 
     # Security / secrets
     secret_key: str = "dev-secret-key"
@@ -22,8 +22,10 @@ class Settings(BaseSettings):
     azure_storage_blob_connection_string: str = ""
     azure_storage_container: str = "documents"
 
-    database_url: str = ""
-    database_url_async :str=""
+    # Database URLs
+    database_url: str = "postgresql://admin:admin@localhost:5432/dfm"
+    database_url_async: str = "postgresql+asyncpg://admin:admin@localhost:5432/dfm"
+
     # Pydantic config to load .env locally
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -49,16 +51,22 @@ def load_settings() -> Settings:
 
         # Fetch Azure Storage secrets 
         azure_storage_blob_connection_string = kv_client.get_secret(
-                "AZURE-STORAGE-BLOB-CONNECTION-STRING"
-            ).value
+            "AZURE-STORAGE-BLOB-CONNECTION-STRING"
+        ).value
+
+        # Fetch Database URLs from Key Vault
+        database_url = kv_client.get_secret("DATABASE-URL").value
+        database_url_async = kv_client.get_secret("DATABASE-URL-ASYNC").value
 
         return Settings(
-                secret_key=secret_key,
-                algorithm=algorithm,
-                app_name=app_name,
-                azure_storage_blob_connection_string=azure_storage_blob_connection_string,
-                debug=os.environ.get("DEBUG", "False").lower() == "true"
-            )
+            secret_key=secret_key,
+            algorithm=algorithm,
+            app_name=app_name,
+            azure_storage_blob_connection_string=azure_storage_blob_connection_string,
+            database_url=database_url,
+            database_url_async=database_url_async,
+            debug=os.environ.get("DEBUG", "False").lower() == "true"
+        )
     else:
         # Local development: Pydantic will automatically load from .env
         return Settings()

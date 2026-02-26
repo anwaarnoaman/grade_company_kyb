@@ -56,12 +56,10 @@ class AzureBlobService:
         }    
     
 
-# azure_service = AzureBlobService()
-
-# # Example: download a blob
-# result = azure_service.download_file(
-#     blob_name="3b9280c5-4944-40bc-947a-e73f2cb1bbc2_UAEU Hourly sheet June 2025-1.pdf",
-#     download_path="/home/aiuser/Downloads/downloaded_file.pdf"
-# )
-
-# print(result)    
+    def delete_file(self, blob_name: str):
+        """
+        Delete a blob from Azure Storage.
+        """
+        blob_client = self.container_client.get_blob_client(blob_name)
+        blob_client.delete_blob()
+        return {"deleted_at": datetime.utcnow(), "blob_name": blob_name} 
