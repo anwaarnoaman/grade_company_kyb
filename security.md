@@ -20,16 +20,13 @@ This project handles synthetic company KYB and financial data for regulatory com
 - **PostgreSQL**:
   - Stores structured company profile and document metadata.
   - Connections secured via SSL/TLS.
-- **MongoDB**:
-  - Stores unified JSON KYB data.
-  - TLS/SSL enforced for all connections.
 - Sensitive fields in logs or UI are masked (e.g., company identifiers).
 
 ---
 
 ## Access Control
 
-- Backend services have **least-privilege access** to Blob Storage, PostgreSQL, and MongoDB.
+- Backend services have **least-privilege access** to Blob Storage and PostgreSQL.
 - Frontend communicates only with the backend via **HTTPS API using OAuth JWT tokens** for authentication and authorization.
 - Direct DB or storage access from frontend is prohibited.
 - Users authenticate through the frontend and can only access documents or data they are authorized to view.
@@ -67,9 +64,4 @@ This project handles synthetic company KYB and financial data for regulatory com
 
 - This system is a **POC/prototype**, not production-grade.
 - Security measures are designed for demonstration purposes.
-- Additional production security considerations would include:
-  - Role-based access control (RBAC)
-  - Multi-factor authentication
-  - Data retention policies
-  - Advanced monitoring and alerting
-
+ 
