@@ -14,14 +14,15 @@ services:
       DATABASE_URL: postgresql://admin:admin@postgres:5432/dfm
       DATABASE_URL_ASYNC: postgresql+asyncpg://admin:admin@postgres:5432/dfm
 
-      AZURE_STORAGE_BLOB_CONNECTION_STRING: SOME_VALUE
+      AZURE_STORAGE_BLOB_CONNECTION_STRING: AZURE LINK
       AZURE_STORAGE_CONTAINER: documents
 
     depends_on:
       - postgres
     networks:
       - app_network
-
+    volumes:
+        - ./logs:/app/logs
     command: >
         sh -c "./wait-for-it.sh postgres 5432 -- 
               alembic -c /app/alembic.ini upgrade head &&
