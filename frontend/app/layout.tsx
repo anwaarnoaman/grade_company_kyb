@@ -8,7 +8,7 @@ import './globals.css'
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: 'KYB Platform - Know Your Business',
+  title: 'KYB Platform - DFM',
   description: 'Business compliance and KYB verification platform',
   generator: 'v0.app',
   icons: {

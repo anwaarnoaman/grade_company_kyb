@@ -1,18 +1,60 @@
-version: "3.9"
-
 services:
+
   api:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     ports:
       - "8082:8000"
+    restart: unless-stopped  
     environment:
-      SECRET_KEY: some_secret
+      SECRET_KEY: testsecrect123
       ALGORITHM: HS256
-      DATABASE_URL: postgresql://admin:admin@192.168.2.155:5432/test
-      DATABASE_URL_ASYNC: postgresql+asyncpg://admin:admin@192.168.2.155:5432/test
-      AZURE_STORAGE_BLOB_CONNECTION_STRING: DefaultEndpointsProtocol=https;AccountName=dfm1122storage;AccountKey=Nomi;EndpointSuffix=core.windows.net
+ 
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/dfm
+      DATABASE_URL_ASYNC: postgresql+asyncpg://admin:admin@postgres:5432/dfm
+
+      AZURE_STORAGE_BLOB_CONNECTION_STRING: AZURE LINK
       AZURE_STORAGE_CONTAINER: documents
+
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+    volumes:
+        - ./logs:/app/logs
     command: >
-      sh -c "alembic -c /app/alembic.ini upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+        sh -c "./wait-for-it.sh postgres 5432 -- 
+              alembic -c /app/alembic.ini upgrade head &&
+              uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - app_network
+    environment:
+      NEXT_PUBLIC_BACKEND_API_URL: http://localhost:8082
+
+
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: dfm
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+ 
+networks:
+  app_network:
+    driver: bridge

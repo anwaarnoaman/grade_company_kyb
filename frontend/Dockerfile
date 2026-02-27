@@ -29,6 +29,6 @@ CMD ["npm", "start"]
 
 # sudo docker build -t dfm-app-frontend .
 # sudo docker run -p 3000:3000 dfm-app-frontend 
-# sudo docker tag dfm-app-frontend anwaarnoaman/dfm-app-frontend:1.0.0
-# sudo docker push anwaarnoaman/dfm-app-frontend:1.0.0
+# sudo docker tag dfm-app-frontend anwaarnoaman/dfm-app-frontend:1.0.5
+# sudo docker push anwaarnoaman/dfm-app-frontend:1.0.5
  
